@@ -4,6 +4,7 @@ import { UserErrors } from "../errors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+
 const router = Router();
 
 router.post("/register", async (req: Request, res: Response) => {
@@ -30,19 +31,20 @@ export const verifyToken = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.body.authorization;
+  const authHeader = req.headers.authorization;
   if (authHeader) {
-    jwt.verify(authHeader, process.env.SECRET, (err) => {
+    jwt.verify(authHeader, "secret", (err) => {
       if (err) {
         return res.sendStatus(403);
       }
       next();
     });
   }
+
   return res.sendStatus(401);
 };
 
-router.post("/login", verifyToken, async (req: Request, res: Response) => {
+router.post("/login", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
@@ -57,11 +59,13 @@ router.post("/login", verifyToken, async (req: Request, res: Response) => {
       return res.status(400).json({ type: UserErrors.WRONG_CREDENTIALS });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.SECRET);
+    const token = jwt.sign({ id: user._id }, "secret");
     res.json({ token, userID: user._id });
   } catch (error) {
     res.status(500).json({ type: error });
   }
 });
+
+
 
 export { router as userRouter };
