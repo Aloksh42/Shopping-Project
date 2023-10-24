@@ -4,7 +4,6 @@ import { UserErrors } from "../errors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
 const router = Router();
 
 router.post("/register", async (req: Request, res: Response) => {
@@ -39,9 +38,9 @@ export const verifyToken = (
       }
       next();
     });
+  } else {
+    return res.sendStatus(401);
   }
-
-  return res.sendStatus(401);
 };
 
 router.post("/login", async (req: Request, res: Response) => {
@@ -65,7 +64,5 @@ router.post("/login", async (req: Request, res: Response) => {
     res.status(500).json({ type: error });
   }
 });
-
-
 
 export { router as userRouter };
