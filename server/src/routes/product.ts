@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { ProductModel } from "../models/products";
+import { ProductModel } from "../models/product";
 import { verifyToken } from "./user";
 import { UserModel } from "../models/user";
 import { ProductErrors } from "../errors";
@@ -16,7 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/checkout", verifyToken, async (req: Request, res: Response) => {
+router.post("/checkout", async (req: Request, res: Response) => {
   const { customerID, cartItems } = req.body;
 
   try {

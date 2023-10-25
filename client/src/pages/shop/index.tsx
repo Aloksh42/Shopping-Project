@@ -1,8 +1,19 @@
+import { useGetProducts } from "../../hooks/useGetProducts";
+import { Product } from "./Product";
+import "./styles.css";
 
 const ShopPage = () => {
-  return (
-    <div>ShopPage</div>
-  )
-}
+  const { products } = useGetProducts();
 
-export default ShopPage
+  return (
+    <div className="shop">
+      <div className="products">
+        {products.map((product) => (
+          <Product product={product} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ShopPage;
