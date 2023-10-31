@@ -14,11 +14,9 @@ export interface IShopContext{
   getTotalCartAmount: () => number;
   fetchAvailableMoney: () => void;
   fetchPurchasedItems: () => void;
-  checkout: () => void;
+  checkout: (customerID: string) => void;
   availableMoney: number;
   purchasedItems: IProduct[];
-
-
 }
 
 export const defaultValue: IShopContext = {
