@@ -65,7 +65,7 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
-router.get('/available-money/:userID', async (req: Request, res: Response) => {
+router.get('/availableMoney/:userID',verifyToken, async (req: Request, res: Response) => {
   const {userID} = req.params
 
   try {
@@ -76,7 +76,7 @@ router.get('/available-money/:userID', async (req: Request, res: Response) => {
 
     res.status(200).json({availableMoney: user.availableMoney})
   } catch (error) {
-    res.status(500).json({type: error})
+    res.status(500).json({error})
   }
 })
 

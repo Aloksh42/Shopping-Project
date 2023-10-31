@@ -34,8 +34,7 @@ const CheckoutPage = () => {
               checkout(localStorage.getItem("userID"));
             }}
           >
-            {" "}
-            Checkout{" "}
+            Checkout
           </button>
         </div>
       ) : (

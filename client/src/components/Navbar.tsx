@@ -4,7 +4,7 @@ import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { useContext } from "react";
 import { IShopContext, ShopContext } from "../context/shop-context";
 
-const Navbar = () => {
+export const Navbar = () => {
 
 
   const {availableMoney} = useContext<IShopContext>(ShopContext);
@@ -27,5 +27,3 @@ const Navbar = () => {
     </div>
   );
 };
-
-export default Navbar;

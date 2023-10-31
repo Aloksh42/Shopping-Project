@@ -65,8 +65,8 @@ router.post("/checkout", async (req: Request, res: Response) => {
     res.status(400).json({ error });
   }
 });
-
-router.get("/purchased-items/:customerID", verifyToken, async(req: Request, res: Response) => {
+1
+router.get("/purchasedItems/:customerID", async(req: Request, res: Response) => {
   const customerID = req.params;
 
   try {
