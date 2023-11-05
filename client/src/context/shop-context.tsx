@@ -5,6 +5,7 @@ import axios from "axios";
 import { useGetToken } from "../hooks/useGetToken";
 import { useNavigate } from "react-router-dom";
 import { ProductErrors } from "../models/errors";
+import { useCookies } from "react-cookie";
 
 export interface IShopContext {
   addToCart: (itemId: string) => void;
@@ -12,23 +13,41 @@ export interface IShopContext {
   updateCartItemCount: (newAmount: number, itemId: string) => void;
   getCartItemCount: (itemId: string) => number;
   getTotalCartAmount: () => number;
-  fetchAvailableMoney: () => void;
-  fetchPurchasedItems: () => void;
+  // fetchAvailableMoney: () => void;
+  // fetchPurchasedItems: () => void;
   checkout: (customerID: string) => void;
   availableMoney: number;
   purchasedItems: IProduct[];
+  isAuthenticated: boolean;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
 }
 
-export const ShopContext = createContext<IShopContext | null>(null);
+const defaultValue: IShopContext = {
+  addToCart: () => null,
+  removeFromCart: () => null,
+  updateCartItemCount: () => null,
+  getCartItemCount: () => 0,
+  getTotalCartAmount: () => 0,
+  checkout: () => null,
+  availableMoney: 0,
+  purchasedItems: [],
+  isAuthenticated: false,
+  setIsAuthenticated: () => null,
+}
+
+export const ShopContext = createContext<IShopContext | null>(defaultValue);
 
 export const ShopContextProvider = (props) => {
   const { products, fetchProducts } = useGetProducts();
   const { headers } = useGetToken();
   const navigate = useNavigate();
 
+  const [cookies, setCookies] = useCookies(["access_token"])
+
   const [cartItems, setCartItems] = useState<{ string: number } | {}>({});
   const [availableMoney, setAvailableMoney] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<IProduct[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(cookies.access_token!==null)
 
   const addToCart = (itemId: string) => {
     if (!cartItems[itemId]) {
@@ -91,7 +110,7 @@ export const ShopContextProvider = (props) => {
   const fetchPurchasedItems = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3001/product/purchasedItems/${localStorage.getItem(
+        `http://localhost:3001/product/purchased-items/${localStorage.getItem(
           "userID"
         )}`,
         { headers }
@@ -104,8 +123,19 @@ export const ShopContextProvider = (props) => {
   };
 
   useEffect(() => {
-    fetchAvailableMoney();
-  }, []);
+    if(isAuthenticated){
+      fetchAvailableMoney();
+      fetchPurchasedItems();
+    }
+    
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.clear();
+      setCookies("access_token", null);
+    }
+  }, [isAuthenticated]);
 
   const checkout = async () => {
     const body = { customerID: localStorage.getItem("userID"), cartItems };
@@ -116,6 +146,7 @@ export const ShopContextProvider = (props) => {
         body,
         { headers }
       );
+
       setPurchasedItems(res.data.purchasedItems);
       fetchAvailableMoney();
       fetchProducts();
@@ -147,11 +178,13 @@ export const ShopContextProvider = (props) => {
     updateCartItemCount,
     getCartItemCount,
     getTotalCartAmount,
-    fetchAvailableMoney,
-    fetchPurchasedItems,
+    // fetchAvailableMoney,
+    // fetchPurchasedItems,
     checkout,
     availableMoney,
     purchasedItems,
+    isAuthenticated,
+    setIsAuthenticated
   };
 
   return (
