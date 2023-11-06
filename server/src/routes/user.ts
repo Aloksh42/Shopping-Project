@@ -10,7 +10,7 @@ router.post("/register", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    const user = await UserModel.findOne({ username });
+    const user: IUser = await UserModel.findOne({ username });
 
     if (user) {
       return res.status(400).json({ type: UserErrors.USERNAME_ALREADY_EXISTS });
@@ -32,7 +32,7 @@ export const verifyToken = (
 ) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
-    jwt.verify(authHeader, "secret", (err) => {
+    jwt.verify(authHeader, process.env.SECRET_KEY, (err) => {
       if (err) {
         return res.sendStatus(403);
       }
@@ -43,7 +43,7 @@ export const verifyToken = (
   }
 };
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", verifyToken, async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
@@ -58,7 +58,7 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(400).json({ type: UserErrors.WRONG_CREDENTIALS });
     }
 
-    const token = jwt.sign({ id: user._id }, "secret");
+    const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
     res.json({ token, userID: user._id });
   } catch (error) {
     res.status(500).json({ type: error });
