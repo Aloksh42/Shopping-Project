@@ -1,0 +1,30 @@
+[
+  {
+    "_id": {
+      "$oid": "653926ceb34d2ee69ab2e282"
+    },
+    "productName": "Bluetooth Speaker",
+    "price": {
+      "$numberDouble": "45.56"
+    },
+    "description": "Portable Bluetooth speaker with High bass",
+    "imageURL": "https://m.media-amazon.com/images/I/8193DNNjZFS._AC_UY436_FMwebp_QL65_.jpg",
+    "stockQuantity": {
+      "$numberInt": "186"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "653926ceb34d2ee69ab2e281"
+    },
+    "productName": "Airpods",
+    "price": {
+      "$numberDouble": "59.99"
+    },
+    "description": "High Quality wireless earbuds with Active Noise Cancellation",
+    "imageURL": "https://m.media-amazon.com/images/I/61SUj2aKoEL._SL1500_.jpg",
+    "stockQuantity": {
+      "$numberInt": "489"
+    }
+  }
+]
