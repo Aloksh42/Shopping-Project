@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SyntheticEvent, useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { UserErrors } from "../../models/errors";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
@@ -15,57 +15,6 @@ export const AuthPage = () => {
   );
 };
 
-const Register = () => {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-
-  const handleSubmit = async (event: SyntheticEvent) => {
-    event.preventDefault();
-
-    try {
-      await axios.post("http://localhost:3001/user/register", {
-        username,
-        password,
-      });
-      alert("Registration completed , Now Login");
-    } catch (error) {
-      if (error?.result?.data?.type === UserErrors.USERNAME_ALREADY_EXISTS) {
-        alert("Error: User Already in use! ");
-      } else {
-        alert("Error: Something went wrong");
-      }
-    }
-  };
-
-  return (
-    <div className="auth-container">
-      <form onSubmit={handleSubmit}>
-        <h2>Register</h2>
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button>Register</button>
-      </form>
-    </div>
-  );
-};
-
 const Login = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -75,18 +24,20 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: SyntheticEvent) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const result = await axios.post("http://localhost:3001/user/login", {
+      const result = await axios.post("http://localhost:3001/auth/login", {
         username,
         password,
       });
+
       setCookies("access_token", result.data.token);
-      localStorage.setItem("userID", result.data.userID);
+      window.localStorage.setItem("userID", result.data.userID);
       setIsAuthenticated(true);
       navigate("/");
+
     } catch (error) {
       let errorMessage: string = "";
       switch (error?.response?.data?.type) {
@@ -126,8 +77,61 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button>Login</button>
+        <button type="submit">Login</button>
       </form>
     </div>
   );
 };
+
+
+const Register = () => {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      await axios.post("http://localhost:3001/auth/register", {
+        username,
+        password,
+      });
+      alert("Registration completed , Now Login");
+    } catch (error) {
+      if (error?.response?.data?.type === UserErrors.USERNAME_ALREADY_EXISTS) {
+        alert("User Already in use! ");
+      } else {
+        alert("Something went wrong");
+      }
+    }
+  };
+
+  return (
+    <div className="auth-container">
+      <form onSubmit={handleSubmit}>
+        <h2>Register</h2>
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  );
+};
+

@@ -1,10 +1,10 @@
 import { useCookies } from "react-cookie";
 import { useGetProducts } from "../../hooks/useGetProducts";
-import { Product } from "./Product";
+import { Product } from "./product";
 import "./styles.css";
 import { Navigate } from "react-router-dom";
 
-const ShopPage = () => {
+export const ShopPage = () => {
   const [cookies, _] = useCookies(["access_token"]);
   const { products } = useGetProducts();
 
@@ -22,5 +22,3 @@ const ShopPage = () => {
     </div>
   );
 };
-
-export default ShopPage;

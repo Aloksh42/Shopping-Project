@@ -1,22 +1,24 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
+
 import { useGetToken } from "./useGetToken";
-import { IProduct } from "../models/interfaces";
 
 export const useGetProducts = () => {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const {headers} = useGetToken();
+  const [products, setProducts] = useState([]);
+  const { headers } = useGetToken();
 
   const fetchProducts = async () => {
-    const fetchedProducts = await axios("http://localhost:3001/product", { headers });
+    const products = await axios.get("http://localhost:3001/products", {
+      headers,
+    });
 
-    setProducts(fetchedProducts.data.products);
+    setProducts(products.data.products);
   };
 
   useEffect(() => {
     fetchProducts();
   }, []);
-  
+
   return {
     products,
     fetchProducts,

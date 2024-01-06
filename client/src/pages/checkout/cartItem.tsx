@@ -3,12 +3,12 @@ import { IProduct } from "../../models/interfaces";
 import { ShopContext } from "../../context/shop-context";
 
 interface Props {
-  product: IProduct;
+  data: IProduct;
 }
 
 export const CartItem = (props: Props) => {
   const { _id, productName, price, imageURL } =
-    props.product;
+    props.data;
   const { getCartItemCount, addToCart, removeFromCart, updateCartItemCount } =
     useContext(ShopContext);
 

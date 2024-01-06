@@ -6,7 +6,7 @@ import { CartItem } from "./cartItem";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
 
-const CheckoutPage = () => {
+export const CheckoutPage = () => {
   const { products } = useGetProducts();
   const { getCartItemCount, getTotalCartAmount, checkout } =
     useContext(ShopContext);
@@ -20,7 +20,7 @@ const CheckoutPage = () => {
       <div className="cart">
         {products.map((product: IProduct) => {
           if (getCartItemCount(product._id) !== 0) {
-            return <CartItem product = {product} />;
+            return <CartItem data={product} />;
           }
         })}
       </div>
@@ -43,5 +43,3 @@ const CheckoutPage = () => {
     </div>
   );
 };
-
-export default CheckoutPage;

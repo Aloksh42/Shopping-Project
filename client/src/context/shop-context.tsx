@@ -1,7 +1,7 @@
-import { createContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from "react";
 import { useGetProducts } from "../hooks/useGetProducts";
 import { IProduct } from "../models/interfaces";
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { useGetToken } from "../hooks/useGetToken";
 import { useNavigate } from "react-router-dom";
 import { ProductErrors } from "../models/errors";
@@ -13,41 +13,73 @@ export interface IShopContext {
   updateCartItemCount: (newAmount: number, itemId: string) => void;
   getCartItemCount: (itemId: string) => number;
   getTotalCartAmount: () => number;
-  // fetchAvailableMoney: () => void;
-  // fetchPurchasedItems: () => void;
   checkout: (customerID: string) => void;
   availableMoney: number;
+  fetchAvailableMoney: () => void;
   purchasedItems: IProduct[];
   isAuthenticated: boolean;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
 }
 
-const defaultValue: IShopContext = {
-  addToCart: () => null,
-  removeFromCart: () => null,
-  updateCartItemCount: () => null,
-  getCartItemCount: () => 0,
-  getTotalCartAmount: () => 0,
-  checkout: () => null,
-  availableMoney: 0,
-  purchasedItems: [],
-  isAuthenticated: false,
-  setIsAuthenticated: () => null,
-}
-
-export const ShopContext = createContext<IShopContext | null>(defaultValue);
+export const ShopContext = createContext<IShopContext | null>(null);
 
 export const ShopContextProvider = (props) => {
   const { products, fetchProducts } = useGetProducts();
   const { headers } = useGetToken();
   const navigate = useNavigate();
 
-  const [cookies, setCookies] = useCookies(["access_token"])
+  const [cookies, setCookies] = useCookies(["access_token"]);
 
   const [cartItems, setCartItems] = useState<{ string: number } | {}>({});
   const [availableMoney, setAvailableMoney] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<IProduct[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(cookies.access_token!==null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    cookies.access_token !== null
+  );
+
+  const fetchAvailableMoney = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:3001/auth/available-money/${localStorage.getItem(
+          "userID"
+        )}`,
+        { headers }
+      );
+
+      setAvailableMoney(res.data.availableMoney);
+    } catch (error) {
+      alert("Something went wrong");
+    }
+  };
+
+  const fetchPurchasedItems = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:3001/products/purchased-items/${localStorage.getItem(
+          "userID"
+        )}`,
+        { headers }
+      );
+
+      setPurchasedItems(res.data.purchasedItems);
+    } catch (error) {
+      alert("Something went wrong");
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAvailableMoney();
+      fetchPurchasedItems();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.clear();
+      setCookies("access_token", null);
+    }
+  }, [isAuthenticated]);
 
   const addToCart = (itemId: string) => {
     if (!cartItems[itemId]) {
@@ -77,7 +109,7 @@ export const ShopContextProvider = (props) => {
   };
 
   const getTotalCartAmount = () => {
-    if (products.length == 0) {
+    if (products.length === 0) {
       return 0;
     }
     let totalAmount = 0;
@@ -86,63 +118,19 @@ export const ShopContextProvider = (props) => {
         let itemInfo: IProduct = products.find(
           (product) => product._id === item
         );
+
         totalAmount += cartItems[item] * itemInfo.price;
       }
     }
     return Number(totalAmount.toFixed(2));
   };
 
-  const fetchAvailableMoney = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:3001/user/availableMoney/${localStorage.getItem(
-          "userID"
-        )}`,
-        { headers }
-      );
-
-      setAvailableMoney(res.data.availableMoney);
-    } catch (error) {
-      alert("Error: Something went wrong");
-    }
-  };
-
-  const fetchPurchasedItems = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:3001/product/purchased-items/${localStorage.getItem(
-          "userID"
-        )}`,
-        { headers }
-      );
-
-      setPurchasedItems(res.data.purchasedItems);
-    } catch (error) {
-      alert("Error: Something went wrong");
-    }
-  };
-
-  useEffect(() => {
-    if(isAuthenticated){
-      fetchAvailableMoney();
-      fetchPurchasedItems();
-    }
-    
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.clear();
-      setCookies("access_token", null);
-    }
-  }, [isAuthenticated]);
-
   const checkout = async () => {
     const body = { customerID: localStorage.getItem("userID"), cartItems };
 
     try {
       const res = await axios.post(
-        "http://localhost:3001/product/checkout",
+        "http://localhost:3001/products/checkout",
         body,
         { headers }
       );
@@ -178,13 +166,12 @@ export const ShopContextProvider = (props) => {
     updateCartItemCount,
     getCartItemCount,
     getTotalCartAmount,
-    // fetchAvailableMoney,
-    // fetchPurchasedItems,
+    fetchAvailableMoney,
     checkout,
     availableMoney,
     purchasedItems,
     isAuthenticated,
-    setIsAuthenticated
+    setIsAuthenticated,
   };
 
   return (

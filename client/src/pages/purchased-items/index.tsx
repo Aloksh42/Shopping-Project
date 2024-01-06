@@ -1,10 +1,10 @@
 import { useContext } from "react";
-import { IShopContext, ShopContext } from "../../context/shop-context";
+import { ShopContext } from "../../context/shop-context";
 import "./styles.css";
 
 export const PurchasedItemsPage = () => {
   const { purchasedItems, addToCart, getCartItemCount } =
-    useContext<IShopContext>(ShopContext);
+    useContext(ShopContext);
 
   return (
     <div className="purchased-items-page">
@@ -14,9 +14,9 @@ export const PurchasedItemsPage = () => {
         {purchasedItems.map((item) => {
           const cartItemCount = getCartItemCount(item._id);
           return (
-            <div className="item">
+            <div key={item._id} className="item">
               <h3> {item.productName} </h3>
-              <img src={item.imageURL} />
+              <img src={item.imageURL} alt={item.productName} />
               <p> ${item.price} </p>
               <button onClick={() => addToCart(item._id)}>
                 Purchase Again {cartItemCount > 0 && <> ({cartItemCount})</>}

@@ -5,19 +5,20 @@ import { useContext } from "react";
 import { IShopContext, ShopContext } from "../context/shop-context";
 
 export const Navbar = () => {
-  const { availableMoney, setIsAuthenticated, isAuthenticated } =
+  const { availableMoney, isAuthenticated, setIsAuthenticated } =
     useContext<IShopContext>(ShopContext);
+
   const logout = () => {
     setIsAuthenticated(false);
   };
 
   return (
     <div className="navbar">
-      <div className="navbar-title">
+      <div className="navbarTitle">
         <h2>Alok's Shop</h2>
       </div>
 
-      <div className="navbar-links">
+      <div className="navbarLinks">
         {isAuthenticated && (
           <>
             <Link to="/">Shop</Link>
