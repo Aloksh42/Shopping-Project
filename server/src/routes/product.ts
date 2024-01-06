@@ -2,21 +2,17 @@ import { Router, Request, Response } from "express";
 import { ProductModel } from "../models/product";
 import { verifyToken } from "./user";
 import { UserModel } from "../models/user";
-import { ProductErrors, UserErrors } from "../errors";
+import { ProductErrors } from "../common/errors";
 
 const router = Router();
 
-router.get("/", async (req: Request, res: Response) => {
-  try {
-    const products = await ProductModel.find({});
+router.get("/", async (_, res: Response) => {
+  const products = await ProductModel.find({});
 
-    res.json({ products });
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+  res.json({ products });
 });
 
-router.post("/checkout", async (req: Request, res: Response) => {
+router.post("/checkout", verifyToken, async (req: Request, res: Response) => {
   const { customerID, cartItems } = req.body;
 
   try {
@@ -49,7 +45,7 @@ router.post("/checkout", async (req: Request, res: Response) => {
     }
 
     if (totalPrice > user.availableMoney) {
-      return res.status(400).json({ type: ProductErrors.NOT_ENOUGH_MONEY });
+      return res.status(400).json({ type: ProductErrors.NO_AVAILABLE_MONEY });
     }
     user.availableMoney -= totalPrice;
     user.purchasedItems.push(...productIDs);
@@ -62,30 +58,31 @@ router.post("/checkout", async (req: Request, res: Response) => {
 
     res.json({ purchasedItems: user.purchasedItems });
   } catch (error) {
-    res.status(400).json({ error });
+    console.log(error);
   }
 });
 
-router.get("/purchased-items/:customerID",verifyToken, async(req: Request, res: Response) => {
-  const customerID = req.params;
+router.get(
+  "/purchased-items/:customerID",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    const customerID = req.params;
 
-  try {
-    const user = await UserModel.findById(customerID)
-    if(!user){
-      return res.status(400).json({type: UserErrors.NO_USER_FOUND  });
+    try {
+      const user = await UserModel.findById(customerID);
+      if (!user) {
+        return res.status(400).json({ type: ProductErrors.NO_USERS_FOUND });
+      }
+
+      const products = await ProductModel.find({
+        _id: { $in: user.purchasedItems },
+      });
+
+      res.json({ purchasedItems: products });
+    } catch (error) {
+      res.status(400).json({ type: ProductErrors.NO_USERS_FOUND });
     }
-
-    const products = await ProductModel.find({
-      _id: {$in: user.purchasedItems}
-    })
-
-    res.json({purchasedItems: products});
-    
-  } catch (error) {
-    res.status(500).json({type: error});
   }
-})
-
-
+);
 
 export { router as productRouter };
